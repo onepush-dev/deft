@@ -15,7 +15,7 @@ Deploy button: _added after the template is generated_
 | Service | Image | Volume |
 |---|---|---|
 | Deft | `ghcr.io/onepush-dev/deft:0.3.0-preview.140` | `/app/uploads` |
-| Postgres | `pgvector/pgvector:0.8.7-pg16` (pgvector is required by Deft's schema) | `/var/lib/postgresql/data` |
+| Postgres | `pgvector/pgvector:0.8.6-pg16@sha256:ccc6e83d…` — the exact image upstream pins in its compose file. Keep it: Deft's fresh-install check fingerprints the Postgres and pgvector versions | `/var/lib/postgresql/data` (`PGDATA` = `/var/lib/postgresql/data/pgdata`) |
 
 ## Variables
 

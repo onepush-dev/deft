@@ -29,8 +29,10 @@ node /app/railway/wait-for-db.mjs
 # Upstream's one-shot init/upgrade services, folded into startup.
 init_fresh() {
   echo "[railway] fresh database: running init (db:assert-fresh, db:push-full, db:seed)"
-  pnpm db:assert-fresh && pnpm db:push-full && pnpm db:seed
-  node /app/railway/db-state.mjs mark
+  pnpm db:assert-fresh || exit 1
+  pnpm db:push-full || exit 1
+  pnpm db:seed || exit 1
+  node /app/railway/db-state.mjs mark || exit 1
   echo "[railway] init complete"
 }
 state=$(node /app/railway/db-state.mjs state)
@@ -38,11 +40,11 @@ case "$state" in
   fresh) init_fresh ;;
   partial)
     echo "[railway] an earlier first-boot init did not finish and no accounts exist: resetting the empty schema and re-running init"
-    node /app/railway/db-state.mjs reset
+    node /app/railway/db-state.mjs reset || exit 1
     init_fresh ;;
   ready|existing)
     echo "[railway] existing database (${state}): running db:upgrade"
-    pnpm db:upgrade ;;
+    pnpm db:upgrade || exit 1 ;;
   *) echo "[railway] could not read database state"; exit 1 ;;
 esac
 
