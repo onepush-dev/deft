@@ -14,8 +14,8 @@ async function state() {
   const [{ m }] = await q("SELECT to_regclass('railway_bootstrap.init_done') IS NOT NULL AS m")
   if (m) return 'ready'
   const [{ u }] = await q("SELECT to_regclass('public.users') IS NOT NULL AS u")
-  const users = u ? (await q('SELECT count(*)::int AS k FROM public.users'))[0].k : 0
-  // No accounts were ever created: an earlier first boot stopped mid-init (e.g. Postgres restarted).
+  const users = u ? (await q('SELECT count(*)::int AS k FROM public.users WHERE NOT is_agent'))[0].k : 0
+  // No human accounts were ever created: an earlier first boot stopped mid-init (e.g. Postgres restarted).
   return users === 0 ? 'partial' : 'existing'
 }
 await c.connect()
