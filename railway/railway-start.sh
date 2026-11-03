@@ -27,16 +27,24 @@ cd /app
 node /app/railway/wait-for-db.mjs
 
 # Upstream's one-shot init/upgrade services, folded into startup.
-tables=$(node -e "
-const pg=require('/app/packages/db/node_modules/pg');const c=new pg.Client({connectionString:process.env.DATABASE_URL});
-c.connect().then(()=>c.query(\"SELECT count(*)::int AS n FROM information_schema.tables WHERE table_schema='public' AND table_type='BASE TABLE'\")).then(r=>{console.log(r.rows[0].n);return c.end()}).catch(e=>{console.error(e.message);process.exit(1)})")
-if [ "$tables" = "0" ]; then
+init_fresh() {
   echo "[railway] fresh database: running init (db:assert-fresh, db:push-full, db:seed)"
   pnpm db:assert-fresh && pnpm db:push-full && pnpm db:seed
-else
-  echo "[railway] existing database (${tables} tables): running db:upgrade"
-  pnpm db:upgrade
-fi
+  node /app/railway/db-state.mjs mark
+  echo "[railway] init complete"
+}
+state=$(node /app/railway/db-state.mjs state)
+case "$state" in
+  fresh) init_fresh ;;
+  partial)
+    echo "[railway] an earlier first-boot init did not finish and no accounts exist: resetting the empty schema and re-running init"
+    node /app/railway/db-state.mjs reset
+    init_fresh ;;
+  ready|existing)
+    echo "[railway] existing database (${state}): running db:upgrade"
+    pnpm db:upgrade ;;
+  *) echo "[railway] could not read database state"; exit 1 ;;
+esac
 
 # Upstream entrypoint starts API (:3001) and web (:3000); keep Railway's PORT for Caddy.
 caddy run --config /app/railway/Caddyfile --adapter caddyfile &

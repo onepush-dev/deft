@@ -8,7 +8,7 @@ Deploy button: _added after the template is generated_
 
 - `Dockerfile` — `FROM ghcr.io/maneek21/deft:0.3.0-preview.140` (official AGPL-3.0 release image, pinned by digest), plus Caddy and a start wrapper. Built by GitHub Actions to `ghcr.io/onepush-dev/deft:0.3.0-preview.140`.
 - `railway/Caddyfile` — upstream's documented single-origin routing on Railway's `$PORT`: `/api`, `/socket.io`, `/oauth`, `/.well-known`, `/health` → API (:3001), everything else → web (:3000).
-- `railway/railway-start.sh` — waits for Postgres, runs upstream's one-shot `init` (`db:assert-fresh`, `db:push-full`, `db:seed`) on a fresh database or `db:upgrade` on an existing one, keeps both upload folders on the volume, sets all `NEXT_PUBLIC_*` URLs to the Railway public domain, then runs upstream's entrypoint.
+- `railway/railway-start.sh` — waits for Postgres, runs upstream's one-shot `init` (`db:assert-fresh`, `db:push-full`, `db:seed`) on a fresh database or `db:upgrade` on an existing one (a first boot interrupted before any account exists is reset and re-initialised; marker in schema `railway_bootstrap`), keeps both upload folders on the volume, sets all `NEXT_PUBLIC_*` URLs to the Railway public domain, then runs upstream's entrypoint.
 
 ## Services
 

@@ -12,6 +12,7 @@ COPY --from=caddy /usr/bin/caddy /usr/local/bin/caddy
 COPY --chmod=644 railway/Caddyfile /app/railway/Caddyfile
 COPY --chmod=755 railway/railway-start.sh /app/railway/railway-start.sh
 COPY --chmod=644 railway/wait-for-db.mjs /app/railway/wait-for-db.mjs
+COPY --chmod=644 railway/db-state.mjs /app/railway/db-state.mjs
 ENV PORT=8080 \
     API_PORT=3001 \
     DEFT_SELF_HOSTED=true \
